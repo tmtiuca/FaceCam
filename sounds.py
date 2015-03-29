@@ -1,11 +1,6 @@
-from Tkinter import *
-from tkSnack import *
-
-root = Tk()
-
-tkSnack.initializeSnack(root)
-
-snd = Sound() 
-snd.read('allen_arrogh.wav')   
-snd.play()
-root.mainloop()   
+import pygame
+pygame.mixer.init()
+pygame.mixer.music.load("sound.wav")
+pygame.mixer.music.play()
+while pygame.mixer.music.get_busy() == True:
+    continue
