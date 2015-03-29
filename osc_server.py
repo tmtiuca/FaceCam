@@ -10,34 +10,8 @@ average_long = 0
 counter_long = 0
 counter_short = 0
 
-moving_average_short = [] 
-moving_average_long = [] 
-
-def vibration_short (moving_average_short):
-    global average_short
-    average_short = 0
-    if len(moving_average_short) == 0:
-        return 0
-    for i in moving_average_short:
-        average_short += i
-    average_short = average_short / len(moving_average_short)
-    if abs(average_short) < 0.2:
-        return True
-    return False
-
-def vibration_long (moving_average_long):
-    global average_long 
-    average_long = 0
-    if len(moving_average_long) == 0:
-        return 0
-    for i in moving_average_long:
-        print 'hello'
-        print i
-        average_long += i
-    average_long = average_long / len(moving_average_long)
-    if abs(average_long) < 0.1:
-        return True
-    return False
+moving_average_short = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
+moving_average_long = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] 
 
 class MuseServer(ServerThread):
 
@@ -47,29 +21,31 @@ class MuseServer(ServerThread):
 
     @make_method('/muse/elements/experimental/mellow', 'f')
     def con_callback(self, path, args):
-        global counter_long
-        global counter_short 
-
+        tempShortAvg = moving_average_short[1:29]
+        tempLongAvg = moving_average_long[1:599]
         print '___________________________________________________________________________________________________'
         print args 
         # replace counter based on the effect of time.sleep function below
-        counter_long = counter_long + 1 
-        counter_short = counter_short + 1
+        counter_long += 1 
+        counter_short += 1
         args = float(args[0])
-        moving_average_short.append(args)
-        moving_average_short[1:5] # splice frorm 1-1000
-        if (vibration_short(moving_average_short)) == True:
+        tempShortAvg.append(args)
+        tempLongAvg.append(args)
+        
+        average_short = sum(tempShortAvg)/30
+        average_long = sum(tempLongAvg)/600
+
+        moving_average_short = tempShortAvg
+        moving_average_long = tempLongAvg
+
+        if average_short < 0.1:
             url = 'http://www.google.com'
             c = webbrowser.get('safari')
             c.open(url)
-        if counter_long == 3:
-            moving_average_long.append(args)
-            moving_average_long[1:10]
-            counter_long == 0
-            if (vibration_long(moving_average_long)) == True:
-                #xfoil = sp.Popen(['/Applications/Firefox.app/Contents/MacOS/Firefox'], stdin=sp.PIPE, stdout=sp.PIPE)
-                controller = webbrowser.get('Firefox')
-                controller.open('http://www.google.com')
+        if average_long < 0.25:
+            url = 'http://www.google.com'
+            c = webbrowser.get('safari')
+            c.open(url)
 try:
     server = MuseServer()
 except ServerError, err:
